@@ -108,7 +108,7 @@ class SupabaseManager: ObservableObject {
         
         try await client
             .from("claims")
-            .insert(dto)
+            .insert(values: dto)
             .execute()
     }
     
@@ -120,7 +120,7 @@ class SupabaseManager: ObservableObject {
         
         try await client
             .from("claims")
-            .update(dto)
+            .update(values: dto)
             .eq("id", value: claim.id.uuidString)
             .execute()
     }
