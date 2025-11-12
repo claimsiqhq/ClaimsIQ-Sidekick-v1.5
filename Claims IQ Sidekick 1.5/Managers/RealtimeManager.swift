@@ -365,10 +365,10 @@ class RealtimeManager: ObservableObject {
                 if let recordId = event.recordId,
                    let uuid = UUID(uuidString: recordId) {
                     
-                    let predicate = #Predicate<Claim> { $0.id == uuid }
-                    let descriptor = FetchDescriptor<Claim>(predicate: predicate)
+                    let descriptor = FetchDescriptor<Claim>()
+                    let claims = try context.fetch(descriptor)
                     
-                    if try context.fetch(descriptor).isEmpty {
+                    if !claims.contains(where: { $0.id == uuid }) {
                         // Fetch full claim from Supabase
                         // Convert and insert
                     }
@@ -379,10 +379,10 @@ class RealtimeManager: ObservableObject {
                 if let recordId = event.recordId,
                    let uuid = UUID(uuidString: recordId) {
                     
-                    let predicate = #Predicate<Claim> { $0.id == uuid }
-                    let descriptor = FetchDescriptor<Claim>(predicate: predicate)
+                    let descriptor = FetchDescriptor<Claim>()
+                    let claims = try context.fetch(descriptor)
                     
-                    if let claim = try context.fetch(descriptor).first {
+                    if let claim = claims.first(where: { $0.id == uuid }) {
                         // Update claim fields from payload
                         // Mark as synced
                         claim.syncStatus = .synced
@@ -396,10 +396,10 @@ class RealtimeManager: ObservableObject {
                 if let recordId = event.recordId,
                    let uuid = UUID(uuidString: recordId) {
                     
-                    let predicate = #Predicate<Claim> { $0.id == uuid }
-                    let descriptor = FetchDescriptor<Claim>(predicate: predicate)
+                    let descriptor = FetchDescriptor<Claim>()
+                    let claims = try context.fetch(descriptor)
                     
-                    if let claim = try context.fetch(descriptor).first {
+                    if let claim = claims.first(where: { $0.id == uuid }) {
                         context.delete(claim)
                         try context.save()
                     }

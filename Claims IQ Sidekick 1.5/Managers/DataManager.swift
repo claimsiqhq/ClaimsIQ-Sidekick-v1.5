@@ -183,10 +183,11 @@ class DataManager: ObservableObject {
             
             for remoteClaim in remoteClaims {
                 // Check if claim exists locally
-                let predicate = #Predicate<Claim> { $0.id == remoteClaim.id }
-                let descriptor = FetchDescriptor<Claim>(predicate: predicate)
+                let remoteId = remoteClaim.id
+                let descriptor = FetchDescriptor<Claim>()
+                let allClaims = try context.fetch(descriptor)
                 
-                if let existingClaim = try context.fetch(descriptor).first {
+                if let existingClaim = allClaims.first(where: { $0.id == remoteId }) {
                     // Update existing claim if remote is newer
                     if remoteClaim.updatedAt > existingClaim.updatedAt {
                         updateLocalClaim(existingClaim, from: remoteClaim)
@@ -206,17 +207,18 @@ class DataManager: ObservableObject {
     
     // MARK: - Helper Methods
     
-    private func createSyncQueueItem<T: PersistentModel & Encodable>(
-        for model: T,
+    private func createSyncQueueItem(
+        for claim: Claim,
         operation: SyncOperationType,
         tableName: String
     ) -> SyncQueue {
         do {
-            let data = try JSONEncoder().encode(model)
+            let dto = claim.toDTO()
+            let data = try JSONEncoder().encode(dto)
             return SyncQueue(
                 operationType: operation,
                 tableName: tableName,
-                recordId: nil, // Would need to extract ID from model
+                recordId: claim.id,
                 data: data
             )
         } catch {
@@ -224,7 +226,38 @@ class DataManager: ObservableObject {
             return SyncQueue(
                 operationType: operation,
                 tableName: tableName,
-                recordId: nil,
+                recordId: claim.id,
+                data: Data()
+            )
+        }
+    }
+    
+    private func createSyncQueueItem(
+        for photo: Photo,
+        operation: SyncOperationType,
+        tableName: String
+    ) -> SyncQueue {
+        do {
+            // Create a simple DTO for photo
+            let photoData: [String: Any] = [
+                "id": photo.id.uuidString,
+                "storage_path": photo.storagePath,
+                "claim_id": photo.claim?.id.uuidString ?? "",
+                "damage_type": photo.damageType ?? "",
+                "is_synced": photo.isSynced
+            ]
+            let data = try JSONSerialization.data(withJSONObject: photoData)
+            return SyncQueue(
+                operationType: operation,
+                tableName: tableName,
+                recordId: photo.id,
+                data: data
+            )
+        } catch {
+            return SyncQueue(
+                operationType: operation,
+                tableName: tableName,
+                recordId: photo.id,
                 data: Data()
             )
         }

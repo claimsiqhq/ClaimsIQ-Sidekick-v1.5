@@ -183,11 +183,10 @@ class SyncManager: ObservableObject {
                 throw SyncError.missingRecordId
             }
             
-            let descriptor = FetchDescriptor<Photo>(
-                predicate: #Predicate { $0.id == recordId }
-            )
+            let descriptor = FetchDescriptor<Photo>()
+            let photos = try context.fetch(descriptor)
             
-            guard let photo = try context.fetch(descriptor).first else {
+            guard let photo = photos.first(where: { $0.id == recordId }) else {
                 throw SyncError.recordNotFound
             }
             

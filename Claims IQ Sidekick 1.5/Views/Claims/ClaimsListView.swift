@@ -205,10 +205,11 @@ struct ClaimsListView: View {
             // Update or insert claims
             for fetchedClaim in fetchedClaims {
                 // Check if claim already exists
-                let predicate = #Predicate<Claim> { $0.id == fetchedClaim.id }
-                let descriptor = FetchDescriptor<Claim>(predicate: predicate)
+                let fetchedId = fetchedClaim.id
+                let descriptor = FetchDescriptor<Claim>()
+                let allClaims = try? modelContext.fetch(descriptor) ?? []
                 
-                if let existingClaim = try? modelContext.fetch(descriptor).first {
+                if let existingClaim = allClaims.first(where: { $0.id == fetchedId }) {
                     // Update existing claim
                     existingClaim.syncStatus = .synced
                     existingClaim.lastSyncedAt = Date()
