@@ -6,6 +6,21 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2E7E5BA62EC42126002255AE /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BA52EC42126002255AE /* Auth */; };
+		2E7E5BA82EC42126002255AE /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BA72EC42126002255AE /* Functions */; };
+		2E7E5BAA2EC42126002255AE /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BA92EC42126002255AE /* PostgREST */; };
+		2E7E5BAC2EC42126002255AE /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BAB2EC42126002255AE /* Realtime */; };
+		2E7E5BAE2EC42126002255AE /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BAD2EC42126002255AE /* Storage */; };
+		2E7E5BB02EC42126002255AE /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BAF2EC42126002255AE /* Supabase */; };
+		2E7E5BB32EC421B7002255AE /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BB22EC421B7002255AE /* Nuke */; };
+		2E7E5BB52EC421B7002255AE /* NukeExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BB42EC421B7002255AE /* NukeExtensions */; };
+		2E7E5BB72EC421B7002255AE /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BB62EC421B7002255AE /* NukeUI */; };
+		2E7E5BB92EC421B7002255AE /* NukeVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BB82EC421B7002255AE /* NukeVideo */; };
+		2E7E5BBC2EC421E0002255AE /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BBB2EC421E0002255AE /* KeychainAccess */; };
+		2E7E5BBF2EC42213002255AE /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 2E7E5BBE2EC42213002255AE /* OpenAI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2EDFF7E72EBE9E49007B1A31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +80,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E7E5BAA2EC42126002255AE /* PostgREST in Frameworks */,
+				2E7E5BB52EC421B7002255AE /* NukeExtensions in Frameworks */,
+				2E7E5BA82EC42126002255AE /* Functions in Frameworks */,
+				2E7E5BB32EC421B7002255AE /* Nuke in Frameworks */,
+				2E7E5BBC2EC421E0002255AE /* KeychainAccess in Frameworks */,
+				2E7E5BB02EC42126002255AE /* Supabase in Frameworks */,
+				2E7E5BA62EC42126002255AE /* Auth in Frameworks */,
+				2E7E5BB72EC421B7002255AE /* NukeUI in Frameworks */,
+				2E7E5BB92EC421B7002255AE /* NukeVideo in Frameworks */,
+				2E7E5BAE2EC42126002255AE /* Storage in Frameworks */,
+				2E7E5BBF2EC42213002255AE /* OpenAI in Frameworks */,
+				2E7E5BAC2EC42126002255AE /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +152,18 @@
 			);
 			name = "Claims IQ Sidekick 1.5";
 			packageProductDependencies = (
+				2E7E5BA52EC42126002255AE /* Auth */,
+				2E7E5BA72EC42126002255AE /* Functions */,
+				2E7E5BA92EC42126002255AE /* PostgREST */,
+				2E7E5BAB2EC42126002255AE /* Realtime */,
+				2E7E5BAD2EC42126002255AE /* Storage */,
+				2E7E5BAF2EC42126002255AE /* Supabase */,
+				2E7E5BB22EC421B7002255AE /* Nuke */,
+				2E7E5BB42EC421B7002255AE /* NukeExtensions */,
+				2E7E5BB62EC421B7002255AE /* NukeUI */,
+				2E7E5BB82EC421B7002255AE /* NukeVideo */,
+				2E7E5BBB2EC421E0002255AE /* KeychainAccess */,
+				2E7E5BBE2EC42213002255AE /* OpenAI */,
 			);
 			productName = "Claims IQ Sidekick 1.5";
 			productReference = 2EDFF7D52EBE9E48007B1A31 /* Claims IQ Sidekick 1.5.app */;
@@ -208,6 +247,12 @@
 			);
 			mainGroup = 2EDFF7CC2EBE9E48007B1A31;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */,
+				2E7E5BBA2EC421E0002255AE /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				2E7E5BBD2EC421F9002255AE /* XCRemoteSwiftPackageReference "OpenAI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2EDFF7D62EBE9E48007B1A31 /* Products */;
 			projectDirPath = "";
@@ -599,6 +644,104 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+		2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+		2E7E5BBA2EC421E0002255AE /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		2E7E5BBD2EC421F9002255AE /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MacPaw/OpenAI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2E7E5BA52EC42126002255AE /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		2E7E5BA72EC42126002255AE /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		2E7E5BA92EC42126002255AE /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		2E7E5BAB2EC42126002255AE /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		2E7E5BAD2EC42126002255AE /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		2E7E5BAF2EC42126002255AE /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BA42EC42126002255AE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		2E7E5BB22EC421B7002255AE /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		2E7E5BB42EC421B7002255AE /* NukeExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeExtensions;
+		};
+		2E7E5BB62EC421B7002255AE /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+		2E7E5BB82EC421B7002255AE /* NukeVideo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BB12EC421B7002255AE /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeVideo;
+		};
+		2E7E5BBB2EC421E0002255AE /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BBA2EC421E0002255AE /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+		2E7E5BBE2EC42213002255AE /* OpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2E7E5BBD2EC421F9002255AE /* XCRemoteSwiftPackageReference "OpenAI" */;
+			productName = OpenAI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2EDFF7CD2EBE9E48007B1A31 /* Project object */;
 }
