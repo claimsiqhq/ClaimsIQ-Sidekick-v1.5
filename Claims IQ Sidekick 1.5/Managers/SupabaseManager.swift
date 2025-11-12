@@ -105,11 +105,11 @@ class SupabaseManager: ObservableObject {
             throw SupabaseError.authRequired
         }
         let dto = claim.toDTO(userId: userId)
-        
-        try await client
+        let insertBuilder = try client
             .from("claims")
-            .insert(values: dto)
-            .execute()
+            .insert(dto)
+        
+        try await insertBuilder.execute()
     }
     
     func updateClaim(_ claim: Claim) async throws {
@@ -117,12 +117,12 @@ class SupabaseManager: ObservableObject {
             throw SupabaseError.authRequired
         }
         let dto = claim.toDTO(userId: userId)
-        
-        try await client
+        let updateBuilder = try client
             .from("claims")
-            .update(values: dto)
+            .update(dto)
             .eq("id", value: claim.id.uuidString)
-            .execute()
+        
+        try await updateBuilder.execute()
     }
     
     // MARK: - Storage Operations
