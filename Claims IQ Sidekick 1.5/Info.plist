@@ -5,6 +5,24 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>fetch</string>
+		<string>processing</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>ClaimsIQ needs camera access to capture photos of property damage for insurance claims.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ClaimsIQ needs photo library access to save and upload claim photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>ClaimsIQ needs permission to save photos to your photo library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ClaimsIQ needs your location to tag photos with GPS coordinates and optimize your daily route.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>ClaimsIQ needs your location to provide route optimization and location-based services even in the background.</string>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 </dict>
 </plist>
