@@ -343,7 +343,7 @@ struct ActivityRow: View {
                 .cornerRadius(8)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(activity.description)
+                Text(activity.activityDescription)
                     .font(.subheadline)
                 
                 Text(activity.createdAt, style: .relative)

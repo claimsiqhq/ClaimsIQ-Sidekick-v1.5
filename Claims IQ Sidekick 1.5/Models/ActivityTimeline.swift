@@ -12,7 +12,7 @@ import SwiftData
 final class ActivityTimeline {
     @Attribute(.unique) var id: UUID
     var activityType: ActivityType
-    var description: String
+    var activityDescription: String
     var metadata: Data? // JSON encoded
     var createdAt: Date
     
@@ -26,7 +26,7 @@ final class ActivityTimeline {
     ) {
         self.id = UUID()
         self.activityType = activityType
-        self.description = description
+        self.activityDescription = description
         self.createdAt = Date()
     }
     

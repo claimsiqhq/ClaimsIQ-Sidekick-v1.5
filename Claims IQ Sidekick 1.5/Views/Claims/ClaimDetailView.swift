@@ -662,7 +662,7 @@ struct TimelineRow: View {
                         .foregroundStyle(.secondary)
                 }
                 
-                Text(activity.description)
+                Text(activity.activityDescription)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
