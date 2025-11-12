@@ -6,15 +6,15 @@
 //
 
 import Foundation
+import Combine
 import Supabase
 import SwiftData
-import Combine
 
 class RealtimeManager: ObservableObject {
     static let shared = RealtimeManager()
     
     private let supabaseManager = SupabaseManager.shared
-    private var channel: RealtimeChannel?
+    private var channel: RealtimeChannelV2?
     private var subscriptions: [AnyCancellable] = []
     
     @Published var isConnected = false
@@ -46,7 +46,7 @@ class RealtimeManager: ObservableObject {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
         // Create channel for user-specific updates
-        channel = supabaseManager.client.realtime.channel("claims:\(userId)")
+        channel = supabaseManager.client.realtimeV2.channel("claims:\(userId)")
         
         // Subscribe to claims table changes
         subscribeToClaimsChanges()
@@ -62,16 +62,14 @@ class RealtimeManager: ObservableObject {
         
         // Connect to channel
         Task {
-            do {
-                await channel?.subscribe()
-                
-                await MainActor.run {
-                    self.isConnected = true
-                    self.lastUpdate = Date()
-                }
-                
-                print("Connected to Supabase Realtime")
+            await channel?.subscribe()
+            
+            await MainActor.run {
+                self.isConnected = true
+                self.lastUpdate = Date()
             }
+            
+            print("Connected to Supabase Realtime")
         }
     }
     
@@ -93,105 +91,135 @@ class RealtimeManager: ObservableObject {
     private func subscribeToClaimsChanges() {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
-        // Listen for INSERT events
-        channel?.onPostgresChange(
-            event: .insert,
-            schema: "public",
-            table: "claims",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handleClaimInsert(payload)
-        }
-        
-        // Listen for UPDATE events
-        channel?.onPostgresChange(
-            event: .update,
-            schema: "public",
-            table: "claims",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handleClaimUpdate(payload)
-        }
-        
-        // Listen for DELETE events
-        channel?.onPostgresChange(
-            event: .delete,
-            schema: "public",
-            table: "claims",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handleClaimDelete(payload)
+        // Listen for all events on claims table
+        Task {
+            await channel?.onPostgresChange(
+                InsertAction(
+                    schema: "public",
+                    table: "claims",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .insert(insertAction) = action {
+                    self?.handleClaimInsert(insertAction)
+                }
+            }
+            
+            await channel?.onPostgresChange(
+                UpdateAction(
+                    schema: "public",
+                    table: "claims",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .update(updateAction) = action {
+                    self?.handleClaimUpdate(updateAction)
+                }
+            }
+            
+            await channel?.onPostgresChange(
+                DeleteAction(
+                    schema: "public",
+                    table: "claims",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .delete(deleteAction) = action {
+                    self?.handleClaimDelete(deleteAction)
+                }
+            }
         }
     }
     
     private func subscribeToPhotosChanges() {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
-        channel?.onPostgresChange(
-            event: .insert,
-            schema: "public",
-            table: "photos",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handlePhotoInsert(payload)
-        }
-        
-        channel?.onPostgresChange(
-            event: .update,
-            schema: "public",
-            table: "photos",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handlePhotoUpdate(payload)
-        }
-        
-        channel?.onPostgresChange(
-            event: .delete,
-            schema: "public",
-            table: "photos",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handlePhotoDelete(payload)
+        Task {
+            await channel?.onPostgresChange(
+                InsertAction(
+                    schema: "public",
+                    table: "photos",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .insert(insertAction) = action {
+                    self?.handlePhotoInsert(insertAction)
+                }
+            }
+            
+            await channel?.onPostgresChange(
+                UpdateAction(
+                    schema: "public",
+                    table: "photos",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .update(updateAction) = action {
+                    self?.handlePhotoUpdate(updateAction)
+                }
+            }
+            
+            await channel?.onPostgresChange(
+                DeleteAction(
+                    schema: "public",
+                    table: "photos",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .delete(deleteAction) = action {
+                    self?.handlePhotoDelete(deleteAction)
+                }
+            }
         }
     }
     
     private func subscribeToDocumentsChanges() {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
-        channel?.onPostgresChange(
-            event: .insert,
-            schema: "public",
-            table: "documents",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handleDocumentInsert(payload)
+        Task {
+            await channel?.onPostgresChange(
+                InsertAction(
+                    schema: "public",
+                    table: "documents",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .insert(insertAction) = action {
+                    self?.handleDocumentInsert(insertAction)
+                }
+            }
         }
     }
     
     private func subscribeToActivityChanges() {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
-        channel?.onPostgresChange(
-            event: .insert,
-            schema: "public",
-            table: "activity_timeline",
-            filter: "user_id=eq.\(userId)"
-        ) { [weak self] payload in
-            self?.handleActivityInsert(payload)
+        Task {
+            await channel?.onPostgresChange(
+                InsertAction(
+                    schema: "public",
+                    table: "activity_timeline",
+                    filter: "user_id=eq.\(userId)"
+                )
+            ) { [weak self] action in
+                if case let .insert(insertAction) = action {
+                    self?.handleActivityInsert(insertAction)
+                }
+            }
         }
     }
     
     // MARK: - Event Handlers
     
-    private func handleClaimInsert(_ payload: PostgresChangePayload) {
+    private func handleClaimInsert(_ action: InsertAction) {
         Task { @MainActor in
-            guard let record = payload.record else { return }
+            let record = action.record
             
             // Create event
             let event = RealtimeEvent(
                 type: .claimInserted,
                 tableName: "claims",
-                recordId: record["id"]?.stringValue,
+                recordId: record["id"] as? String,
                 timestamp: Date(),
                 payload: record
             )
@@ -211,16 +239,16 @@ class RealtimeManager: ObservableObject {
         }
     }
     
-    private func handleClaimUpdate(_ payload: PostgresChangePayload) {
+    private func handleClaimUpdate(_ action: UpdateAction) {
         Task { @MainActor in
-            guard let record = payload.record,
-                  let oldRecord = payload.oldRecord else { return }
+            let record = action.record
+            let oldRecord = action.oldRecord
             
             // Create event
             let event = RealtimeEvent(
                 type: .claimUpdated,
                 tableName: "claims",
-                recordId: record["id"]?.stringValue,
+                recordId: record["id"] as? String,
                 timestamp: Date(),
                 payload: record,
                 oldPayload: oldRecord
@@ -241,15 +269,15 @@ class RealtimeManager: ObservableObject {
         }
     }
     
-    private func handleClaimDelete(_ payload: PostgresChangePayload) {
+    private func handleClaimDelete(_ action: DeleteAction) {
         Task { @MainActor in
-            guard let oldRecord = payload.oldRecord else { return }
+            let oldRecord = action.oldRecord
             
             // Create event
             let event = RealtimeEvent(
                 type: .claimDeleted,
                 tableName: "claims",
-                recordId: oldRecord["id"]?.stringValue,
+                recordId: oldRecord["id"] as? String,
                 timestamp: Date(),
                 oldPayload: oldRecord
             )
@@ -269,15 +297,15 @@ class RealtimeManager: ObservableObject {
         }
     }
     
-    private func handlePhotoInsert(_ payload: PostgresChangePayload) {
+    private func handlePhotoInsert(_ action: InsertAction) {
         Task { @MainActor in
-            guard let record = payload.record else { return }
+            let record = action.record
             
             // Create event
             let event = RealtimeEvent(
                 type: .photoInserted,
                 tableName: "photos",
-                recordId: record["id"]?.stringValue,
+                recordId: record["id"] as? String,
                 timestamp: Date(),
                 payload: record
             )
@@ -294,23 +322,23 @@ class RealtimeManager: ObservableObject {
         }
     }
     
-    private func handlePhotoUpdate(_ payload: PostgresChangePayload) {
+    private func handlePhotoUpdate(_ action: UpdateAction) {
         // Similar to claim update
     }
     
-    private func handlePhotoDelete(_ payload: PostgresChangePayload) {
+    private func handlePhotoDelete(_ action: DeleteAction) {
         // Similar to claim delete
     }
     
-    private func handleDocumentInsert(_ payload: PostgresChangePayload) {
+    private func handleDocumentInsert(_ action: InsertAction) {
         Task { @MainActor in
-            guard let record = payload.record else { return }
+            let record = action.record
             
             // Create event
             let event = RealtimeEvent(
                 type: .documentInserted,
                 tableName: "documents",
-                recordId: record["id"]?.stringValue,
+                recordId: record["id"] as? String,
                 timestamp: Date(),
                 payload: record
             )
@@ -327,15 +355,15 @@ class RealtimeManager: ObservableObject {
         }
     }
     
-    private func handleActivityInsert(_ payload: PostgresChangePayload) {
+    private func handleActivityInsert(_ action: InsertAction) {
         Task { @MainActor in
-            guard let record = payload.record else { return }
+            let record = action.record
             
             // Create event
             let event = RealtimeEvent(
                 type: .activityInserted,
                 tableName: "activity_timeline",
-                recordId: record["id"]?.stringValue,
+                recordId: record["id"] as? String,
                 timestamp: Date(),
                 payload: record
             )
@@ -432,16 +460,16 @@ struct RealtimeEvent: Identifiable {
     let tableName: String
     let recordId: String?
     let timestamp: Date
-    let payload: [String: AnyJSON]?
-    let oldPayload: [String: AnyJSON]?
+    let payload: [String: Any]?
+    let oldPayload: [String: Any]?
     
     init(
         type: RealtimeEventType,
         tableName: String,
         recordId: String? = nil,
         timestamp: Date = Date(),
-        payload: [String: AnyJSON]? = nil,
-        oldPayload: [String: AnyJSON]? = nil
+        payload: [String: Any]? = nil,
+        oldPayload: [String: Any]? = nil
     ) {
         self.type = type
         self.tableName = tableName

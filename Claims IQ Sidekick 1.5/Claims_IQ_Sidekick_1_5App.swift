@@ -54,9 +54,6 @@ struct Claims_IQ_Sidekick_1_5App: App {
                 }
         }
         .modelContainer(sharedModelContainer)
-        .backgroundTask(.appRefresh("com.claimsiq.sync")) {
-            await syncManager.performSync()
-        }
     }
     
     // MARK: - Background Tasks
@@ -67,7 +64,8 @@ struct Claims_IQ_Sidekick_1_5App: App {
             using: nil
         ) { task in
             Task {
-                await syncManager.handleBackgroundTask(task: task)
+                await syncManager.performSync()
+                task.setTaskCompleted(success: true)
             }
         }
     }

@@ -349,22 +349,3 @@ enum ConflictResolutionStrategy {
     case merge
 }
 
-// MARK: - Background Task Handler
-
-extension SyncManager {
-    func handleBackgroundTask(task: BGTask) async {
-        // Schedule next background task
-        scheduleNextBackgroundTask()
-        
-        // Perform sync
-        await performSync()
-        
-        // Mark task as completed
-        task.setTaskCompleted(success: true)
-    }
-    
-    private func scheduleNextBackgroundTask() {
-        // This would schedule the next background sync
-        // Implementation depends on BGTaskScheduler
-    }
-}

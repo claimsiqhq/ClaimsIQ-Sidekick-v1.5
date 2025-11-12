@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 import Supabase
 import KeychainAccess
 
@@ -65,14 +66,12 @@ class SupabaseManager: ObservableObject {
         let response = try await client.auth.signUp(
             email: email,
             password: password,
-            data: ["full_name": .string(fullName)]
+            data: ["full_name": fullName]
         )
         
-        if let user = response.user {
-            await MainActor.run {
-                self.currentUser = user
-                self.isAuthenticated = true
-            }
+        await MainActor.run {
+            self.currentUser = response.user
+            self.isAuthenticated = true
         }
     }
     
@@ -91,7 +90,7 @@ class SupabaseManager: ObservableObject {
     // MARK: - Database Operations
     
     func fetchClaims() async throws -> [Claim] {
-        let response: [ClaimDTO] = try await client.database
+        let response: [ClaimDTO] = try await client
             .from("claims")
             .select()
             .order("created_at", ascending: false)
@@ -104,7 +103,7 @@ class SupabaseManager: ObservableObject {
     func createClaim(_ claim: Claim) async throws {
         let dto = claim.toDTO()
         
-        try await client.database
+        try await client
             .from("claims")
             .insert(dto)
             .execute()
@@ -113,7 +112,7 @@ class SupabaseManager: ObservableObject {
     func updateClaim(_ claim: Claim) async throws {
         let dto = claim.toDTO()
         
-        try await client.database
+        try await client
             .from("claims")
             .update(dto)
             .eq("id", value: claim.id.uuidString)
@@ -132,8 +131,8 @@ class SupabaseManager: ObservableObject {
         try await client.storage
             .from(Configuration.photoBucketName)
             .upload(
-                path: path,
-                data: imageData,
+                path,
+                file: imageData,
                 options: FileOptions(contentType: "image/jpeg")
             )
         
@@ -146,8 +145,8 @@ class SupabaseManager: ObservableObject {
             .download(path: path)
     }
     
-    func getPhotoURL(path: String) throws -> URL {
-        return try client.storage
+    func getPhotoURL(path: String) async throws -> URL {
+        return try await client.storage
             .from(Configuration.photoBucketName)
             .createSignedURL(path: path, expiresIn: 3600)
     }
