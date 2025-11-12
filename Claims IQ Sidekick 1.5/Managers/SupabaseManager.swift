@@ -101,7 +101,10 @@ class SupabaseManager: ObservableObject {
     }
     
     func createClaim(_ claim: Claim) async throws {
-        let dto = claim.toDTO()
+        guard let userId = currentUser?.id.uuidString else {
+            throw SupabaseError.authRequired
+        }
+        let dto = claim.toDTO(userId: userId)
         
         try await client
             .from("claims")
@@ -110,7 +113,10 @@ class SupabaseManager: ObservableObject {
     }
     
     func updateClaim(_ claim: Claim) async throws {
-        let dto = claim.toDTO()
+        guard let userId = currentUser?.id.uuidString else {
+            throw SupabaseError.authRequired
+        }
+        let dto = claim.toDTO(userId: userId)
         
         try await client
             .from("claims")
