@@ -341,11 +341,18 @@
 				INFOPLIST_FILE = "Claims IQ Sidekick 1.5/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Claims IQ Sidekick";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ClaimsIQ needs camera access to capture photos of property damage for insurance claims.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "ClaimsIQ needs your location to provide route optimization and location-based services even in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ClaimsIQ needs your location to tag photos with GPS coordinates and optimize your daily route.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "ClaimsIQ needs permission to save photos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ClaimsIQ needs photo library access to save and upload claim photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -377,11 +384,18 @@
 				INFOPLIST_FILE = "Claims IQ Sidekick 1.5/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Claims IQ Sidekick";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ClaimsIQ needs camera access to capture photos of property damage for insurance claims.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "ClaimsIQ needs your location to provide route optimization and location-based services even in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ClaimsIQ needs your location to tag photos with GPS coordinates and optimize your daily route.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "ClaimsIQ needs permission to save photos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ClaimsIQ needs photo library access to save and upload claim photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
