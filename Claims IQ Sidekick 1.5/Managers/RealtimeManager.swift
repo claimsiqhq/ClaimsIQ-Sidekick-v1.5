@@ -28,10 +28,10 @@ class RealtimeManager: ObservableObject {
     // MARK: - Setup
     
     private func setupRealtimeConnection() {
-        // Subscribe to authentication changes
-        supabaseManager.$isAuthenticated
-            .sink { [weak self] isAuthenticated in
-                if isAuthenticated {
+        // Monitor auth state changes
+        supabaseManager.$currentUser
+            .sink { [weak self] user in
+                if user != nil {
                     self?.connectToRealtime()
                 } else {
                     self?.disconnectFromRealtime()
@@ -62,27 +62,28 @@ class RealtimeManager: ObservableObject {
         
         // Connect to channel
         Task {
-            await channel?.subscribe()
-            
-            await MainActor.run {
-                self.isConnected = true
-                self.lastUpdate = Date()
+            do {
+                _ = await channel?.subscribe { error in
+                    if let error = error {
+                        print("Failed to connect to Realtime: \(error)")
+                    } else {
+                        Task { @MainActor in
+                            self.isConnected = true
+                            self.lastUpdate = Date()
+                        }
+                        print("Connected to Supabase Realtime")
+                    }
+                }
             }
-            
-            print("Connected to Supabase Realtime")
         }
     }
     
     func disconnectFromRealtime() {
         Task {
             await channel?.unsubscribe()
-            channel = nil
-            
             await MainActor.run {
                 self.isConnected = false
             }
-            
-            print("Disconnected from Supabase Realtime")
         }
     }
     
@@ -91,42 +92,35 @@ class RealtimeManager: ObservableObject {
     private func subscribeToClaimsChanges() {
         guard let userId = supabaseManager.currentUser?.id else { return }
         
-        // Listen for all events on claims table
         Task {
+            // Listen for INSERT events
             await channel?.onPostgresChange(
-                InsertAction(
-                    schema: "public",
-                    table: "claims",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .insert(insertAction) = action {
-                    self?.handleClaimInsert(insertAction)
-                }
+                event: .insert,
+                schema: "public",
+                table: "claims",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handleClaimInsert(change)
             }
             
+            // Listen for UPDATE events
             await channel?.onPostgresChange(
-                UpdateAction(
-                    schema: "public",
-                    table: "claims",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .update(updateAction) = action {
-                    self?.handleClaimUpdate(updateAction)
-                }
+                event: .update,
+                schema: "public",
+                table: "claims",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handleClaimUpdate(change)
             }
             
+            // Listen for DELETE events
             await channel?.onPostgresChange(
-                DeleteAction(
-                    schema: "public",
-                    table: "claims",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .delete(deleteAction) = action {
-                    self?.handleClaimDelete(deleteAction)
-                }
+                event: .delete,
+                schema: "public",
+                table: "claims",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handleClaimDelete(change)
             }
         }
     }
@@ -136,39 +130,30 @@ class RealtimeManager: ObservableObject {
         
         Task {
             await channel?.onPostgresChange(
-                InsertAction(
-                    schema: "public",
-                    table: "photos",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .insert(insertAction) = action {
-                    self?.handlePhotoInsert(insertAction)
-                }
+                event: .insert,
+                schema: "public",
+                table: "photos",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handlePhotoInsert(change)
             }
             
             await channel?.onPostgresChange(
-                UpdateAction(
-                    schema: "public",
-                    table: "photos",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .update(updateAction) = action {
-                    self?.handlePhotoUpdate(updateAction)
-                }
+                event: .update,
+                schema: "public",
+                table: "photos",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handlePhotoUpdate(change)
             }
             
             await channel?.onPostgresChange(
-                DeleteAction(
-                    schema: "public",
-                    table: "photos",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .delete(deleteAction) = action {
-                    self?.handlePhotoDelete(deleteAction)
-                }
+                event: .delete,
+                schema: "public",
+                table: "photos",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handlePhotoDelete(change)
             }
         }
     }
@@ -178,15 +163,12 @@ class RealtimeManager: ObservableObject {
         
         Task {
             await channel?.onPostgresChange(
-                InsertAction(
-                    schema: "public",
-                    table: "documents",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .insert(insertAction) = action {
-                    self?.handleDocumentInsert(insertAction)
-                }
+                event: .insert,
+                schema: "public",
+                table: "documents",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handleDocumentInsert(change)
             }
         }
     }
@@ -196,197 +178,255 @@ class RealtimeManager: ObservableObject {
         
         Task {
             await channel?.onPostgresChange(
-                InsertAction(
-                    schema: "public",
-                    table: "activity_timeline",
-                    filter: "user_id=eq.\(userId)"
-                )
-            ) { [weak self] action in
-                if case let .insert(insertAction) = action {
-                    self?.handleActivityInsert(insertAction)
-                }
+                event: .insert,
+                schema: "public",
+                table: "activity_timeline",
+                filter: "user_id=eq.\(userId)"
+            ) { [weak self] change in
+                self?.handleActivityInsert(change)
             }
         }
     }
     
     // MARK: - Event Handlers
     
-    private func handleClaimInsert(_ action: InsertAction) {
+    private func handleClaimInsert(_ change: PostgresChangePayload) {
         Task { @MainActor in
-            let record = action.record
+            let record = change.new
             
             // Create event
             let event = RealtimeEvent(
                 type: .claimInserted,
                 tableName: "claims",
-                recordId: record["id"] as? String,
+                recordId: extractStringValue(from: record["id"]),
                 timestamp: Date(),
-                payload: record
+                payload: convertToDict(record)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
             // Update local database
-            await updateLocalDatabase(event: event)
+            await processRealtimeEvent(event)
             
-            // Post notification
-            NotificationCenter.default.post(
-                name: .claimInserted,
-                object: nil,
-                userInfo: ["record": record]
-            )
+            // Trigger UI update
+            objectWillChange.send()
         }
     }
     
-    private func handleClaimUpdate(_ action: UpdateAction) {
+    private func handleClaimUpdate(_ change: PostgresChangePayload) {
         Task { @MainActor in
-            let record = action.record
-            let oldRecord = action.oldRecord
+            let record = change.new
+            let oldRecord = change.old
             
-            // Create event
             let event = RealtimeEvent(
                 type: .claimUpdated,
                 tableName: "claims",
-                recordId: record["id"] as? String,
+                recordId: extractStringValue(from: record["id"]),
                 timestamp: Date(),
-                payload: record,
-                oldPayload: oldRecord
+                payload: convertToDict(record),
+                oldPayload: convertToDict(oldRecord)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
-            // Update local database
-            await updateLocalDatabase(event: event)
-            
-            // Post notification
-            NotificationCenter.default.post(
-                name: .claimUpdated,
-                object: nil,
-                userInfo: ["record": record, "oldRecord": oldRecord]
-            )
+            await processRealtimeEvent(event)
+            objectWillChange.send()
         }
     }
     
-    private func handleClaimDelete(_ action: DeleteAction) {
+    private func handleClaimDelete(_ change: PostgresChangePayload) {
         Task { @MainActor in
-            let oldRecord = action.oldRecord
+            let oldRecord = change.old
             
-            // Create event
             let event = RealtimeEvent(
                 type: .claimDeleted,
                 tableName: "claims",
-                recordId: oldRecord["id"] as? String,
+                recordId: extractStringValue(from: oldRecord["id"]),
                 timestamp: Date(),
-                oldPayload: oldRecord
+                oldPayload: convertToDict(oldRecord)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
-            // Update local database
-            await updateLocalDatabase(event: event)
-            
-            // Post notification
-            NotificationCenter.default.post(
-                name: .claimDeleted,
-                object: nil,
-                userInfo: ["oldRecord": oldRecord]
-            )
+            await processRealtimeEvent(event)
+            objectWillChange.send()
         }
     }
     
-    private func handlePhotoInsert(_ action: InsertAction) {
+    private func handlePhotoInsert(_ change: PostgresChangePayload) {
         Task { @MainActor in
-            let record = action.record
+            let record = change.new
             
-            // Create event
             let event = RealtimeEvent(
                 type: .photoInserted,
                 tableName: "photos",
-                recordId: record["id"] as? String,
+                recordId: extractStringValue(from: record["id"]),
                 timestamp: Date(),
-                payload: record
+                payload: convertToDict(record)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
-            // Post notification
-            NotificationCenter.default.post(
-                name: .photoInserted,
-                object: nil,
-                userInfo: ["record": record]
-            )
+            await processRealtimeEvent(event)
+            objectWillChange.send()
         }
     }
     
-    private func handlePhotoUpdate(_ action: UpdateAction) {
+    private func handlePhotoUpdate(_ change: PostgresChangePayload) {
         // Similar to claim update
-    }
-    
-    private func handlePhotoDelete(_ action: DeleteAction) {
-        // Similar to claim delete
-    }
-    
-    private func handleDocumentInsert(_ action: InsertAction) {
         Task { @MainActor in
-            let record = action.record
+            let record = change.new
+            let oldRecord = change.old
             
-            // Create event
+            let event = RealtimeEvent(
+                type: .photoUpdated,
+                tableName: "photos",
+                recordId: extractStringValue(from: record["id"]),
+                timestamp: Date(),
+                payload: convertToDict(record),
+                oldPayload: convertToDict(oldRecord)
+            )
+            
+            realtimeEvents.append(event)
+            lastUpdate = Date()
+            
+            await processRealtimeEvent(event)
+            objectWillChange.send()
+        }
+    }
+    
+    private func handlePhotoDelete(_ change: PostgresChangePayload) {
+        // Similar to claim delete
+        Task { @MainActor in
+            let oldRecord = change.old
+            
+            let event = RealtimeEvent(
+                type: .photoDeleted,
+                tableName: "photos",
+                recordId: extractStringValue(from: oldRecord["id"]),
+                timestamp: Date(),
+                oldPayload: convertToDict(oldRecord)
+            )
+            
+            realtimeEvents.append(event)
+            lastUpdate = Date()
+            
+            await processRealtimeEvent(event)
+            objectWillChange.send()
+        }
+    }
+    
+    private func handleDocumentInsert(_ change: PostgresChangePayload) {
+        Task { @MainActor in
+            let record = change.new
+            
             let event = RealtimeEvent(
                 type: .documentInserted,
                 tableName: "documents",
-                recordId: record["id"] as? String,
+                recordId: extractStringValue(from: record["id"]),
                 timestamp: Date(),
-                payload: record
+                payload: convertToDict(record)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
-            // Post notification
-            NotificationCenter.default.post(
-                name: .documentInserted,
-                object: nil,
-                userInfo: ["record": record]
-            )
+            objectWillChange.send()
         }
     }
     
-    private func handleActivityInsert(_ action: InsertAction) {
+    private func handleActivityInsert(_ change: PostgresChangePayload) {
         Task { @MainActor in
-            let record = action.record
+            let record = change.new
             
-            // Create event
             let event = RealtimeEvent(
                 type: .activityInserted,
                 tableName: "activity_timeline",
-                recordId: record["id"] as? String,
+                recordId: extractStringValue(from: record["id"]),
                 timestamp: Date(),
-                payload: record
+                payload: convertToDict(record)
             )
             
             realtimeEvents.append(event)
             lastUpdate = Date()
             
-            // Post notification
-            NotificationCenter.default.post(
-                name: .activityInserted,
-                object: nil,
-                userInfo: ["record": record]
-            )
+            objectWillChange.send()
         }
     }
     
-    // MARK: - Local Database Updates
+    // MARK: - Helper Methods
     
-    private func updateLocalDatabase(event: RealtimeEvent) async {
+    private func extractStringValue(from json: AnyJSON?) -> String? {
+        guard let json = json else { return nil }
+        
+        switch json {
+        case .string(let value):
+            return value
+        case .int(let value):
+            return String(value)
+        case .double(let value):
+            return String(value)
+        default:
+            return nil
+        }
+    }
+    
+    private func convertToDict(_ json: [String: AnyJSON]) -> [String: Any] {
+        var dict: [String: Any] = [:]
+        for (key, value) in json {
+            switch value {
+            case .string(let str):
+                dict[key] = str
+            case .int(let int):
+                dict[key] = int
+            case .double(let double):
+                dict[key] = double
+            case .bool(let bool):
+                dict[key] = bool
+            case .array(let array):
+                dict[key] = array.map { convertAnyJSON($0) }
+            case .object(let obj):
+                dict[key] = convertToDict(obj)
+            case .null:
+                dict[key] = NSNull()
+            }
+        }
+        return dict
+    }
+    
+    private func convertAnyJSON(_ json: AnyJSON) -> Any {
+        switch json {
+        case .string(let str):
+            return str
+        case .int(let int):
+            return int
+        case .double(let double):
+            return double
+        case .bool(let bool):
+            return bool
+        case .array(let array):
+            return array.map { convertAnyJSON($0) }
+        case .object(let obj):
+            return convertToDict(obj)
+        case .null:
+            return NSNull()
+        }
+    }
+    
+    // MARK: - Database Updates
+    
+    private func processRealtimeEvent(_ event: RealtimeEvent) async {
+        guard let container = try? ModelContainer(for: Claim.self, Photo.self, Document.self, ActivityTimeline.self) else {
+            return
+        }
+        
+        let context = ModelContext(container)
+        
         do {
-            let container = try ModelContainer(for: Claim.self, Photo.self, Document.self)
-            let context = ModelContext(container)
-            
             switch event.type {
             case .claimInserted:
                 // Fetch and insert claim if not exists
@@ -437,18 +477,19 @@ class RealtimeManager: ObservableObject {
                 break
             }
         } catch {
-            print("Failed to update local database: \(error)")
+            print("Error processing realtime event: \(error)")
         }
     }
     
     // MARK: - Public Methods
     
-    func getRecentEvents(limit: Int = 10) -> [RealtimeEvent] {
-        Array(realtimeEvents.suffix(limit))
-    }
-    
     func clearEvents() {
         realtimeEvents.removeAll()
+    }
+    
+    func reconnect() {
+        disconnectFromRealtime()
+        connectToRealtime()
     }
 }
 
@@ -488,35 +529,40 @@ enum RealtimeEventType {
     case photoUpdated
     case photoDeleted
     case documentInserted
-    case documentUpdated
-    case documentDeleted
     case activityInserted
     
     var displayName: String {
         switch self {
-        case .claimInserted: return "New Claim"
+        case .claimInserted: return "Claim Created"
         case .claimUpdated: return "Claim Updated"
         case .claimDeleted: return "Claim Deleted"
         case .photoInserted: return "Photo Added"
         case .photoUpdated: return "Photo Updated"
         case .photoDeleted: return "Photo Deleted"
         case .documentInserted: return "Document Added"
-        case .documentUpdated: return "Document Updated"
-        case .documentDeleted: return "Document Deleted"
-        case .activityInserted: return "New Activity"
+        case .activityInserted: return "Activity Added"
         }
     }
-}
-
-// MARK: - Notification Names
-
-extension Notification.Name {
-    static let claimInserted = Notification.Name("claimInserted")
-    static let claimUpdated = Notification.Name("claimUpdated")
-    static let claimDeleted = Notification.Name("claimDeleted")
-    static let photoInserted = Notification.Name("photoInserted")
-    static let photoUpdated = Notification.Name("photoUpdated")
-    static let photoDeleted = Notification.Name("photoDeleted")
-    static let documentInserted = Notification.Name("documentInserted")
-    static let activityInserted = Notification.Name("activityInserted")
+    
+    var icon: String {
+        switch self {
+        case .claimInserted, .claimUpdated: return "doc.text"
+        case .claimDeleted: return "trash"
+        case .photoInserted, .photoUpdated: return "photo"
+        case .photoDeleted: return "photo.slash"
+        case .documentInserted: return "doc"
+        case .activityInserted: return "clock"
+        }
+    }
+    
+    var color: UIColor {
+        switch self {
+        case .claimInserted, .photoInserted, .documentInserted, .activityInserted:
+            return .systemGreen
+        case .claimUpdated, .photoUpdated:
+            return .systemBlue
+        case .claimDeleted, .photoDeleted:
+            return .systemRed
+        }
+    }
 }

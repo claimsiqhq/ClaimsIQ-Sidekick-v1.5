@@ -66,7 +66,7 @@ class SupabaseManager: ObservableObject {
         let response = try await client.auth.signUp(
             email: email,
             password: password,
-            data: ["full_name": fullName]
+            data: ["full_name": .string(fullName)]
         )
         
         await MainActor.run {
@@ -131,7 +131,7 @@ class SupabaseManager: ObservableObject {
         try await client.storage
             .from(Configuration.photoBucketName)
             .upload(
-                path,
+                path: path,
                 file: imageData,
                 options: FileOptions(contentType: "image/jpeg")
             )
