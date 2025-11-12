@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct ImagePickerView: View {
     let claim: Claim
@@ -50,7 +51,7 @@ struct ImagePickerView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .onChange(of: selectedItems) { _, newItems in
+                    .onChange(of: selectedItems) { newItems in
                         Task {
                             await loadImages(from: newItems)
                         }

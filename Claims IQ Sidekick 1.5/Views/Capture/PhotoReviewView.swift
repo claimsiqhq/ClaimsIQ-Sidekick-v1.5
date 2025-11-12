@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct PhotoReviewView: View {
     let image: UIImage
@@ -397,3 +398,4 @@ enum PhotoError: LocalizedError {
     )
     .environmentObject(SupabaseManager.shared)
 }
+

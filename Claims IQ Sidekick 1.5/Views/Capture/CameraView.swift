@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import CoreLocation
+import UIKit
 
 struct CameraView: View {
     let claim: Claim
@@ -436,3 +437,4 @@ struct GridOverlay: View {
     )
     .environmentObject(LocationManager.shared)
 }
+

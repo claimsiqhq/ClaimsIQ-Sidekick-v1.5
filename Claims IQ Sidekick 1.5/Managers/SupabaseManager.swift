@@ -101,10 +101,10 @@ class SupabaseManager: ObservableObject {
     }
     
     func createClaim(_ claim: Claim) async throws {
-        guard let userId = currentUser?.id.uuidString else {
+        guard currentUser != nil else {
             throw SupabaseError.authRequired
         }
-        let dto = claim.toDTO(userId: userId)
+        let dto = claim.toDTO()
         let insertBuilder = try client
             .from("claims")
             .insert(dto)
@@ -113,10 +113,10 @@ class SupabaseManager: ObservableObject {
     }
     
     func updateClaim(_ claim: Claim) async throws {
-        guard let userId = currentUser?.id.uuidString else {
+        guard currentUser != nil else {
             throw SupabaseError.authRequired
         }
-        let dto = claim.toDTO(userId: userId)
+        let dto = claim.toDTO()
         let updateBuilder = try client
             .from("claims")
             .update(dto)
@@ -137,8 +137,8 @@ class SupabaseManager: ObservableObject {
         try await client.storage
             .from(Configuration.photoBucketName)
             .upload(
-                path: path,
-                file: imageData,
+                path,
+                data: imageData,
                 options: FileOptions(contentType: "image/jpeg")
             )
         

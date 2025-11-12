@@ -8,6 +8,7 @@
 import SwiftUI
 import PhotosUI
 import AVFoundation
+import UIKit
 
 struct CaptureView: View {
     @Environment(\.dismiss) private var dismiss

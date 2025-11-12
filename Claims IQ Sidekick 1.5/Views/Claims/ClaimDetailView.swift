@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import MapKit
+import UIKit
 
 struct ClaimDetailView: View {
     let claim: Claim

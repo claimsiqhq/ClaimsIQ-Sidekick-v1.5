@@ -73,7 +73,7 @@ struct NewClaimView: View {
                 // Property Location
                 Section("Property Location") {
                     Toggle("Use Current Location", isOn: $useCurrentLocation)
-                        .onChange(of: useCurrentLocation) { _, newValue in
+                        .onChange(of: useCurrentLocation) { newValue in
                             if newValue {
                                 fetchCurrentLocation()
                             }
@@ -109,7 +109,7 @@ struct NewClaimView: View {
                     
                     TextField("Deductible", text: $deductible)
                         .keyboardType(.decimalPad)
-                        .onChange(of: deductible) { _, newValue in
+                        .onChange(of: deductible) { newValue in
                             // Format as currency
                             let filtered = newValue.filter { $0.isNumber || $0 == "." }
                             if filtered != newValue {

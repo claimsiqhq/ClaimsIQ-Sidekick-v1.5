@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import Supabase
 import BackgroundTasks
+import UIKit
 
 @main
 struct Claims_IQ_Sidekick_1_5App: App {
